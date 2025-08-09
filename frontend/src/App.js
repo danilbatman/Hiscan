@@ -1,53 +1,75 @@
-import { useEffect } from "react";
-import "./App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import axios from "axios";
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import axios from 'axios';
+import HomePage from './pages/HomePage';
+import AnalysisPage from './pages/AnalysisPage';
+import ResultsPage from './pages/ResultsPage';
+import DashboardPage from './pages/DashboardPage';
+import AuthPage from './pages/AuthPage';
+import './App.css';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
-
-const Home = () => {
-  const helloWorldApi = async () => {
-    try {
-      const response = await axios.get(`${API}/`);
-      console.log(response.data.message);
-    } catch (e) {
-      console.error(e, `errored out requesting / api`);
-    }
-  };
-
-  useEffect(() => {
-    helloWorldApi();
-  }, []);
-
-  return (
-    <div>
-      <header className="App-header">
-        <a
-          className="App-link"
-          href="https://emergent.sh"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img src="https://avatars.githubusercontent.com/in/1201222?s=120&u=2686cf91179bbafbc7a71bfbc43004cf9ae1acea&v=4" />
-        </a>
-        <p className="mt-5">Building something incredible ~!</p>
-      </header>
-    </div>
-  );
-};
+const API_BASE_URL = process.env.REACT_APP_BACKEND_URL;
 
 function App() {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Check if user is logged in
+    const userData = localStorage.getItem('medanalyzer_user');
+    if (userData) {
+      try {
+        setUser(JSON.parse(userData));
+      } catch (error) {
+        console.error('Error parsing user data:', error);
+        localStorage.removeItem('medanalyzer_user');
+      }
+    }
+    setLoading(false);
+  }, []);
+
+  const handleLogin = (userData) => {
+    setUser(userData);
+    localStorage.setItem('medanalyzer_user', JSON.stringify(userData));
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    localStorage.removeItem('medanalyzer_user');
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-pulse text-xl">Загрузка...</div>
+      </div>
+    );
+  }
+
   return (
-    <div className="App">
-      <BrowserRouter>
+    <Router>
+      <div className="App">
         <Routes>
-          <Route path="/" element={<Home />}>
-            <Route index element={<Home />} />
-          </Route>
+          <Route path="/" element={<HomePage />} />
+          <Route 
+            path="/auth" 
+            element={user ? <Navigate to="/dashboard" /> : <AuthPage onLogin={handleLogin} />} 
+          />
+          <Route 
+            path="/analysis" 
+            element={user ? <AnalysisPage user={user} /> : <Navigate to="/auth" />} 
+          />
+          <Route 
+            path="/results/:analysisId" 
+            element={user ? <ResultsPage user={user} /> : <Navigate to="/auth" />} 
+          />
+          <Route 
+            path="/dashboard" 
+            element={user ? <DashboardPage user={user} onLogout={handleLogout} /> : <Navigate to="/auth" />} 
+          />
         </Routes>
-      </BrowserRouter>
-    </div>
+      </div>
+    </Router>
   );
 }
 
