@@ -135,12 +135,14 @@ class MedAnalyzerAPITester:
             "medications": "Витамины"
         }
         
+        # Use files parameter to trigger multipart/form-data
         success, response = self.run_test(
             "Medical Analysis Submission",
             "POST",
             "api/analyze",
             200,
-            data=analysis_data
+            data=analysis_data,
+            files={}  # Empty files dict to trigger multipart encoding
         )
         
         if success and 'analysis_id' in response:
