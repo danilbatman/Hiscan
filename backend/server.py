@@ -195,8 +195,9 @@ async def analyze_medical_data(
     }
     
     # Save to database
-    await db.analyses.insert_one(analysis_result)
+    await db.analyses.insert_one(analysis_result.copy())
     
+    # Return result without MongoDB ObjectId
     return analysis_result
 
 @app.get("/api/user/{user_id}/analyses")
