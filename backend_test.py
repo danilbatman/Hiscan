@@ -131,7 +131,7 @@ class MedAnalyzerAPITester:
             print("❌ No user data available for analysis test")
             return False
             
-        # Test with form data (multipart/form-data)
+        # Test with form data (application/x-www-form-urlencoded)
         analysis_data = {
             "user_id": self.user_data["user_id"],
             "patient_name": "Иван Петров",
@@ -142,14 +142,13 @@ class MedAnalyzerAPITester:
             "medications": "Витамины"
         }
         
-        # Use files parameter to trigger multipart/form-data
         success, response = self.run_test(
             "Medical Analysis Submission",
             "POST",
             "api/analyze",
             200,
             data=analysis_data,
-            files={}  # Empty files dict to trigger multipart encoding
+            form_data=True
         )
         
         if success and 'analysis_id' in response:
