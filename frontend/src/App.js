@@ -57,11 +57,11 @@ function App() {
           />
           <Route 
             path="/analysis" 
-            element={user ? <AnalysisPage user={user} /> : <Navigate to="/auth" />} 
+            element={<AnalysisPage user={user} />} 
           />
           <Route 
             path="/results/:analysisId" 
-            element={user ? <ResultsPage user={user} /> : <Navigate to="/auth" />} 
+            element={<ResultsPage user={user} onLogin={handleLogin} />} 
           />
           <Route 
             path="/dashboard" 
